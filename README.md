@@ -1,5 +1,5 @@
 # Aksen Photo Next.js
 
-Headless frontend Aksen Photo: Next.js + WordPress CMS + Vercel.
+Headless frontend: Next.js + WordPress CMS + Vercel.
 
-Aktualna paczka źródłowa znajduje się w `aksen-photo-nextjs-source.zip`.
+Tracking: GA4 `G-PQFD3M4VTP`, Meta Pixel `2998967330426508`, CookieYes bridge. Google Ads AW/label intentionally pending verification.
