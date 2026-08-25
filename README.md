@@ -2,4 +2,4 @@
 
 Headless frontend Aksen Photo: Next.js + WordPress CMS + Vercel.
 
-See `ANALYTICS.md` and `.env.example` for configuration.
+Aktualna paczka źródłowa znajduje się w `aksen-photo-nextjs-source.zip`.
