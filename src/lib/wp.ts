@@ -1,11 +1,15 @@
 import { fallbackData } from '@/lib/fallback';
 import type { Article, FaqItem, Reportage, Review, SiteData } from '@/types/content';
 
-const base = process.env.WORDPRESS_URL?.replace(/\/$/, '') || 'https://fotografslubny.szczecin.pl';
+const base = process.env.WORDPRESS_URL?.replace(/\/$/, '') || '';
 
 async function request<T>(path: string, revalidate = 300): Promise<T | null> {
+  if (!base) return null;
   try {
-    const response = await fetch(`${base}${path}`, { next: { revalidate } });
+    const response = await fetch(`${base}${path}`, {
+      next: { revalidate },
+      signal: AbortSignal.timeout(3500)
+    });
     if (!response.ok) return null;
     return (await response.json()) as T;
   } catch {
