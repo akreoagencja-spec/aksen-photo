@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function NotFound(){return <main><section className="page-hero"><div className="shell"><p className="eyebrow">404</p><h1>Tej historii tutaj nie ma.</h1><p>Wróć do pełnych reportaży albo sprawdź dostępność terminu.</p><div className="actions"><Link className="button" href="/reportaze">Reportaże</Link><Link className="text-link" href="/rezerwacja">Sprawdź termin →</Link></div></div></section></main>}

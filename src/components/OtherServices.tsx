@@ -1,0 +1,3 @@
+export function OtherServices({ items }: { items: Array<{title:string;url:string;description:string}> }) {
+  return <section className="section muted-section"><div className="shell"><div className="section-head"><p className="eyebrow">Poza ślubami</p><h2>Fotografuję także inne ważne historie</h2><p>Ta strona jest poświęcona przede wszystkim ślubom i weselom. Jeśli szukasz innego rodzaju fotografii, pełną ofertę Aksen Photo znajdziesz na stronie głównej marki.</p></div><div className="service-grid">{items.map(item => <a className="service-card" key={item.url} href={item.url}><h3>{item.title}</h3><p>{item.description}</p><span>Zobacz na Aksen-Photo.pl →</span></a>)}</div></div></section>;
+}
