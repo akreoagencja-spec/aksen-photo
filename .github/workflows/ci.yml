@@ -35,3 +35,13 @@ jobs:
           WORDPRESS_URL: https://aksen-photo.pl
           ALLOW_INDEXING: 'false'
         run: npm run build
+
+      - name: Build SEO baseline inventory
+        run: npm run seo:inventory
+
+      - name: Upload SEO baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-baseline
+          path: seo-baseline.json
+          retention-days: 14
