@@ -4,9 +4,21 @@ const args = new Map();
 for (let index = 2; index < process.argv.length; index += 1) {
   const token = process.argv[index];
   if (!token.startsWith('--')) continue;
-  const key = token.slice(2);
-  const value = process.argv[index + 1]?.startsWith('--') ? true : process.argv[++index] ?? true;
-  args.set(key, value);
+
+  const raw = token.slice(2);
+  const separator = raw.indexOf('=');
+  if (separator >= 0) {
+    args.set(raw.slice(0, separator), raw.slice(separator + 1));
+    continue;
+  }
+
+  const next = process.argv[index + 1];
+  if (next && !next.startsWith('--')) {
+    args.set(raw, next);
+    index += 1;
+  } else {
+    args.set(raw, true);
+  }
 }
 
 const source = new URL(String(args.get('source') || 'https://aksen-photo.pl')).origin;
@@ -188,6 +200,7 @@ if (!inventoryOnly) {
 
 await writeFile(out, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 console.log(`SEO inventory: ${report.urlCount} URLs from ${report.discovery}.`);
+console.log(`SEO report written to: ${out}`);
 if (!inventoryOnly) {
   console.log(`SEO regression failures: ${report.failures.length}.`);
   if (report.failures.length > 0) process.exitCode = 1;
