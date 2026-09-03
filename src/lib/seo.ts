@@ -1,13 +1,18 @@
 import type { Metadata } from 'next';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://fotografslubny.szczecin.pl';
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://aksen-photo.pl').replace(/\/+$/, '');
+export const INDEXING_ENABLED = process.env.ALLOW_INDEXING === 'true';
 
 export function metadata(title: string, description: string, path = '/', image?: string): Metadata {
-  const url = new URL(path, siteUrl).toString();
+  const url = new URL(path, `${SITE_URL}/`).toString();
+
   return {
     title,
     description,
     alternates: { canonical: url },
+    robots: INDEXING_ENABLED
+      ? { index: true, follow: true }
+      : { index: false, follow: false, nocache: true },
     openGraph: {
       type: 'website',
       title,

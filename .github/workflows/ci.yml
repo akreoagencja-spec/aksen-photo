@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-fund
+
+      - name: Dependency security audit
+        run: npm audit --audit-level=high
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://aksen-photo.pl
+          WORDPRESS_URL: https://aksen-photo.pl
+          ALLOW_INDEXING: 'false'
+        run: npm run build
+
+      - name: Build SEO baseline inventory
+        run: npm run seo:inventory
+
+      - name: Upload SEO baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-baseline
+          path: seo-baseline.json
+          retention-days: 14
+          if-no-files-found: error
