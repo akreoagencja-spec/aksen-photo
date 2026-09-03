@@ -48,3 +48,4 @@ jobs:
           name: seo-baseline
           path: seo-baseline.json
           retention-days: 14
+          if-no-files-found: error
