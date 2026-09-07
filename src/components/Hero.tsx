@@ -15,12 +15,14 @@ export function Hero() {
       />
       <div className="hero-shade" />
       <div className="shell hero-content">
-        <p className="eyebrow light">Fotograf Szczecin · Zachodniopomorskie · Polska</p>
-        <h1>{originalSite.hero.headline}</h1>
-        <p>{originalSite.hero.text}</p>
-        <div className="actions">
-          <Link className="button button-light" href="/o-mnie-fotograf-szczecin/">Więcej o mnie</Link>
-          <Link className="text-link light" href="/portfolio-slubne-aksen-photo-fotograf-slubny/">Zobacz portfolio ślubne →</Link>
+        <div className="hero-glass">
+          <p className="eyebrow light">Fotograf Szczecin · Zachodniopomorskie · Polska</p>
+          <h1>{originalSite.hero.headline}</h1>
+          <p>{originalSite.hero.text}</p>
+          <div className="actions">
+            <Link className="button button-light" href="/o-mnie-fotograf-szczecin/">Więcej o mnie</Link>
+            <Link className="text-link light" href="/portfolio-slubne-aksen-photo-fotograf-slubny/">Zobacz portfolio ślubne →</Link>
+          </div>
         </div>
       </div>
     </section>
