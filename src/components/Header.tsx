@@ -1,17 +1,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { originalSite } from '@/lib/original-site';
+import { SocialIcon } from '@/components/SocialIcon';
 
 function SocialLinks({ compact = false }: { compact?: boolean }) {
   return (
     <div className={compact ? 'social-links social-links-compact' : 'social-links'} aria-label="Aksen Photo w social media">
       {originalSite.social.map(item => (
         <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label}>
-          <span aria-hidden="true">{item.short}</span>
+          <SocialIcon name={item.label} />
         </a>
       ))}
       <a href={originalSite.contact.phoneHref} aria-label={`Zadzwoń ${originalSite.contact.phoneDisplay}`}>
-        <span aria-hidden="true">TEL</span>
+        <SocialIcon name="phone" />
       </a>
     </div>
   );
@@ -49,7 +50,7 @@ export function Header() {
         </div>
 
         <details className="mobile-menu">
-          <summary aria-label="Otwórz menu"><span>Menu</span><span className="menu-bars" aria-hidden="true">☰</span></summary>
+          <summary aria-label="Otwórz menu"><span>Menu</span><span className="menu-bars" aria-hidden="true" /></summary>
           <div className="mobile-menu-panel">
             <nav aria-label="Nawigacja mobilna">
               {originalSite.nav.map(item => 'children' in item && item.children ? (
