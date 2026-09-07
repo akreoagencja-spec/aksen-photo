@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { originalSite } from '@/lib/original-site';
+import { SocialIcon } from '@/components/SocialIcon';
 
 const offerNav = originalSite.nav.flatMap(item => 'children' in item && item.children ? [...item.children] : []);
 
@@ -15,7 +16,7 @@ export function Footer({ phone, email }: { phone: string; email: string }) {
         </Link>
         <div className="footer-social" aria-label="Aksen Photo w social media">
           {originalSite.social.map(item => (
-            <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label}>{item.short}</a>
+            <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.label}><SocialIcon name={item.label} /></a>
           ))}
         </div>
       </div>
