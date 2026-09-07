@@ -23,9 +23,7 @@ async function request<T>(path: string, revalidate = 300): Promise<T | null> {
 
       if (response.ok) return (await response.json()) as T;
       if (!RETRYABLE_STATUS.has(response.status)) return null;
-    } catch {
-      // A single delayed retry protects rendering from transient SEOHOST/TLS resets.
-    }
+    } catch {}
   }
 
   return null;
