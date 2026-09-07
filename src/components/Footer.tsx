@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { originalSite } from '@/lib/original-site';
 
-const offerNav = originalSite.nav.find(item => 'children' in item && item.children)?.children || [];
+const offerNav = originalSite.nav.flatMap(item => 'children' in item && item.children ? [...item.children] : []);
 
 export function Footer({ phone, email }: { phone: string; email: string }) {
   const phoneHref = `tel:${phone.replace(/[^+\d]/g, '')}`;
