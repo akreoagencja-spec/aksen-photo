@@ -8,15 +8,25 @@ import { AnalyticsProvider } from '@/components/AnalyticsProvider';
 import { CookieConsentBridge } from '@/components/CookieConsentBridge';
 import { TrackingEvents } from '@/components/TrackingEvents';
 import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
+import { originalSite } from '@/lib/original-site';
 
 const cookieYesId = process.env.NEXT_PUBLIC_COOKIEYES_ID || '';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: 'Fotograf ślubny Szczecin | Aksen Photo', template: '%s | Aksen Photo' },
-  description: 'Naturalna fotografia ślubna w Szczecinie. Pełne reportaże ślubne i weselne, Polska i Niemcy.',
+  title: { default: originalSite.homeSeo.title, template: '%s | Aksen Photo' },
+  description: originalSite.homeSeo.description,
+  icons: {
+    icon: [{ url: originalSite.favicon }],
+    apple: [{ url: originalSite.favicon }]
+  },
+  verification: {
+    other: {
+      'msvalidate.01': ['FEF3D52C23EFF96CF0AE0C50FE58AA0E']
+    }
+  },
   robots: INDEXING_ENABLED
-    ? { index: true, follow: true }
+    ? { index: true, follow: true, 'max-image-preview': 'large' }
     : { index: false, follow: false, nocache: true }
 };
 
@@ -24,7 +34,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const data = await getSiteData();
 
   return (
-    <html lang="pl">
+    <html lang="pl-PL">
       <head>
         <Script id="google-consent-default" strategy="beforeInteractive">{`
           window.dataLayer = window.dataLayer || [];
