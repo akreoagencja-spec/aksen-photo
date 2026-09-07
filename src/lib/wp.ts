@@ -267,13 +267,12 @@ async function findWpEntity(path: string): Promise<WpEntity | null> {
   if (!slug) return null;
 
   const query = `slug=${encodeURIComponent(slug)}&_fields=id,slug,link,date,modified,title,excerpt,content,yoast_head_json`;
-  const [pages, posts] = await Promise.all([
-    request<WpEntity[]>(`/wp-json/wp/v2/pages?${query}`, 300),
-    request<WpEntity[]>(`/wp-json/wp/v2/posts?${query}`, 300)
-  ]);
+  const pages = await request<WpEntity[]>(`/wp-json/wp/v2/pages?${query}`, 300);
+  const page = (pages || []).find(item => normalizedPath(item.link) === wanted);
+  if (page) return page;
 
-  const candidates = [...(pages || []), ...(posts || [])];
-  return candidates.find(item => normalizedPath(item.link) === wanted) || null;
+  const posts = await request<WpEntity[]>(`/wp-json/wp/v2/posts?${query}`, 300);
+  return (posts || []).find(item => normalizedPath(item.link) === wanted) || null;
 }
 
 export async function getLegacyContent(path: string): Promise<LegacyContent | null> {
