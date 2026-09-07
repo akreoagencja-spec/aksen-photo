@@ -108,10 +108,18 @@ function htmlToText(value = ''): string {
 
 export function sanitizeLegacyHtml(value = ''): string {
   return value
+    .replace(/<head\b[^>]*>[\s\S]*?<\/head>/gi, '')
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
     .replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '')
     .replace(/<embed\b[^>]*\/?\s*>/gi, '')
+    .replace(/<meta\b[^>]*\/?\s*>/gi, '')
+    .replace(/<link\b[^>]*\/?\s*>/gi, '')
+    .replace(/<base\b[^>]*\/?\s*>/gi, '')
+    .replace(/<title\b[^>]*>[\s\S]*?<\/title>/gi, '')
+    .replace(/<\/?(?:html|body)\b[^>]*>/gi, '')
     .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/\ssrcdoc\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/javascript\s*:/gi, '');
 }
 
@@ -323,52 +331,12 @@ async function fetchWpCollection(endpoint: 'posts' | 'pages'): Promise<WpEntity[
   return items;
 }
 
-async function fetchTerms(endpoint: 'categories' | 'tags'): Promise<WpTerm[]> {
-  const items: WpTerm[] = [];
-  for (let page = 1; page <= 10; page += 1) {
-    const batch = await request<WpTerm[]>(
-      `/wp-json/wp/v2/${endpoint}?page=${page}&per_page=100&_fields=id,slug,name,count`,
-      1800
-    );
-    if (!batch?.length) break;
-    items.push(...batch);
-    if (batch.length < 100) break;
-  }
-  return items;
-}
-
 export async function getLegacySitemapEntries(): Promise<LegacySitemapEntry[]> {
-  const [posts, pages, categories, tags] = await Promise.all([
-    fetchWpCollection('posts'),
-    fetchWpCollection('pages'),
-    fetchTerms('categories'),
-    fetchTerms('tags')
-  ]);
-  const seen = new Set<string>();
-  const result: LegacySitemapEntry[] = [];
-
+  const [pages, posts] = await Promise.all([fetchWpCollection('pages'), fetchWpCollection('posts')]);
+  const seen = new Map<string, LegacySitemapEntry>();
   for (const item of [...pages, ...posts]) {
     const path = normalizedPath(item.link);
-    if (seen.has(path)) continue;
-    seen.add(path);
-    result.push({ path, modified: item.modified || item.date });
+    if (!seen.has(path)) seen.set(path, { path, modified: item.modified || item.date });
   }
-
-  for (const term of categories) {
-    if ((term.count || 0) <= 0) continue;
-    const path = `/category/${term.slug}`;
-    if (seen.has(path)) continue;
-    seen.add(path);
-    result.push({ path });
-  }
-
-  for (const term of tags) {
-    if ((term.count || 0) <= 0) continue;
-    const path = `/tag/${term.slug}`;
-    if (seen.has(path)) continue;
-    seen.add(path);
-    result.push({ path });
-  }
-
-  return result;
+  return [...seen.values()];
 }
