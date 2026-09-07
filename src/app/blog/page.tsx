@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getArticles } from '@/lib/wp';
+import { getPublicArticles } from '@/lib/wp-public';
 import { metadata as makeMetadata } from '@/lib/seo';
 
 export const metadata = makeMetadata(
@@ -9,7 +9,7 @@ export const metadata = makeMetadata(
 );
 
 export default async function BlogPage() {
-  const items = await getArticles();
+  const items = await getPublicArticles();
 
   return (
     <main>
@@ -31,7 +31,7 @@ export default async function BlogPage() {
               </Link>
             ))}
           </div>
-          {!items.length && <div className="empty-state">Artykuły zostaną pobrane z WordPressa.</div>}
+          {!items.length && <div className="empty-state">Brak opublikowanych artykułów w kategorii Poradnik.</div>}
         </div>
       </section>
     </main>
