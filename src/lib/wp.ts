@@ -41,12 +41,16 @@ type WpAioSeo = {
   description?: string;
   canonical_url?: string;
   robots?: string;
-  og_title?: string;
-  og_description?: string;
-  og_image?: string;
-  twitter_title?: string;
-  twitter_description?: string;
-  twitter_image?: string;
+  'og:locale'?: string;
+  'og:site_name'?: string;
+  'og:type'?: string;
+  'og:title'?: string;
+  'og:description'?: string;
+  'og:image'?: string;
+  'twitter:card'?: string;
+  'twitter:title'?: string;
+  'twitter:description'?: string;
+  'twitter:image'?: string;
   schema?: unknown;
 };
 type WpMedia = {
@@ -88,6 +92,7 @@ export type LegacyContent = {
   seoTitle?: string;
   seoDescription?: string;
   canonical?: string;
+  ogType?: string;
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
@@ -171,7 +176,7 @@ export function sanitizeLegacyHtml(value = ''): string {
 function featuredMedia(item: WpEntity): MediaItem | undefined {
   const media = item._embedded?.['wp:featuredmedia']?.[0];
   const aio = parseAioSeo(item.aioseo_head_json);
-  const url = media?.source_url || aio?.og_image || item.yoast_head_json?.og_image?.[0]?.url;
+  const url = media?.source_url || aio?.['og:image'] || item.yoast_head_json?.og_image?.[0]?.url;
   if (!url) return undefined;
   return {
     id: media?.id || `${item.id}-featured`,
@@ -306,15 +311,16 @@ function toLegacyContent(item: WpEntity): LegacyContent {
     seoTitle: aio?.title ? htmlToText(aio.title) : yoast?.title ? htmlToText(yoast.title) : undefined,
     seoDescription: aio?.description ? htmlToText(aio.description) : yoast?.description ? htmlToText(yoast.description) : undefined,
     canonical: aio?.canonical_url,
-    ogTitle: aio?.og_title ? htmlToText(aio.og_title) : undefined,
-    ogDescription: aio?.og_description ? htmlToText(aio.og_description) : undefined,
-    ogImage: aio?.og_image || fallbackImage,
-    twitterTitle: aio?.twitter_title ? htmlToText(aio.twitter_title) : undefined,
-    twitterDescription: aio?.twitter_description ? htmlToText(aio.twitter_description) : undefined,
-    twitterImage: aio?.twitter_image || aio?.og_image || fallbackImage,
+    ogType: aio?.['og:type'],
+    ogTitle: aio?.['og:title'] ? htmlToText(aio['og:title']) : undefined,
+    ogDescription: aio?.['og:description'] ? htmlToText(aio['og:description']) : undefined,
+    ogImage: aio?.['og:image'] || fallbackImage,
+    twitterTitle: aio?.['twitter:title'] ? htmlToText(aio['twitter:title']) : undefined,
+    twitterDescription: aio?.['twitter:description'] ? htmlToText(aio['twitter:description']) : undefined,
+    twitterImage: aio?.['twitter:image'] || aio?.['og:image'] || fallbackImage,
     noIndex: aioRobots.includes('noindex') || yoast?.robots?.index === 'noindex',
     noFollow: aioRobots.includes('nofollow') || yoast?.robots?.follow === 'nofollow',
-    image: aio?.og_image || fallbackImage
+    image: aio?.['og:image'] || fallbackImage
   };
 }
 
