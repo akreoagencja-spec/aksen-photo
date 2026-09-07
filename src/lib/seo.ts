@@ -7,7 +7,7 @@ export function metadata(title: string, description: string, path = '/', image?:
   const url = new URL(path, `${SITE_URL}/`).toString();
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: url },
     robots: INDEXING_ENABLED
