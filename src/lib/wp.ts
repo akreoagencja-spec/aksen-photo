@@ -2,18 +2,33 @@ import { fallbackData } from '@/lib/fallback';
 import type { Article, FaqItem, MediaItem, Reportage, Review, SiteData } from '@/types/content';
 
 const base = (process.env.WORDPRESS_URL || 'https://aksen-photo.pl').replace(/\/+$/, '');
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+
+function wait(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function request<T>(path: string, revalidate = 300): Promise<T | null> {
-  try {
-    const response = await fetch(`${base}${path}`, {
-      next: { revalidate },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!response.ok) return null;
-    return (await response.json()) as T;
-  } catch {
-    return null;
+  const url = `${base}${path}`;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if (attempt > 0) await wait(350);
+
+    try {
+      const response = await fetch(url, {
+        next: { revalidate },
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(4500)
+      });
+
+      if (response.ok) return (await response.json()) as T;
+      if (!RETRYABLE_STATUS.has(response.status)) return null;
+    } catch {
+      // A single delayed retry protects rendering from transient SEOHOST/TLS resets.
+    }
   }
+
+  return null;
 }
 
 type WpRendered = { rendered?: string };
