@@ -7,13 +7,29 @@ function routePath(segments: string[]): string {
   return `/${segments.map(segment => encodeURIComponent(segment)).join('/')}/`;
 }
 
+function normalizedRoutePath(value: string): string {
+  try {
+    const pathname = value.startsWith('http') ? new URL(value).pathname : value;
+    const clean = `/${decodeURIComponent(pathname)}`.replace(/\/{2,}/g, '/').replace(/\/+$/, '');
+    return clean || '/';
+  } catch {
+    return '/';
+  }
+}
+
+function exactLegacyItem<T extends { path: string }>(item: T | null, requestedPath: string): T | null {
+  if (!item) return null;
+  return normalizedRoutePath(item.path) === normalizedRoutePath(requestedPath) ? item : null;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ segments: string[] }> }) {
   const { segments } = await params;
   const path = routePath(segments);
-  const [item, archive] = await Promise.all([
+  const [rawItem, archive] = await Promise.all([
     getLegacyContent(path),
     getLegacyArchive(path)
   ]);
+  const item = exactLegacyItem(rawItem, path);
 
   if (item) {
     const meta = makeMetadata(
@@ -52,10 +68,11 @@ export async function generateMetadata({ params }: { params: Promise<{ segments:
 export default async function LegacyRoutePage({ params }: { params: Promise<{ segments: string[] }> }) {
   const { segments } = await params;
   const path = routePath(segments);
-  const [item, archive] = await Promise.all([
+  const [rawItem, archive] = await Promise.all([
     getLegacyContent(path),
     getLegacyArchive(path)
   ]);
+  const item = exactLegacyItem(rawItem, path);
 
   if (item) {
     return (
