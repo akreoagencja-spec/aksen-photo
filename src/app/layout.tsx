@@ -3,6 +3,7 @@ import Script from 'next/script';
 import './globals.css';
 import './liquid-glass.css';
 import './mobile-polish.css';
+import './mobile-final.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getSiteData } from '@/lib/wp';
