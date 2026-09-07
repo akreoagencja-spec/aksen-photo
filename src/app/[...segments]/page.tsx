@@ -43,6 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ segments:
       item.ogImage || item.image,
       {
         canonical: item.canonical,
+        openGraphType: item.ogType,
         openGraphTitle: item.ogTitle,
         openGraphDescription: item.ogDescription,
         openGraphImage: item.ogImage || item.image,
