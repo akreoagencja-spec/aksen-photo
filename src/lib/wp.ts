@@ -1,5 +1,5 @@
 import { fallbackData } from '@/lib/fallback';
-import type { Article, FaqItem, Reportage, Review, SiteData } from '@/types/content';
+import type { Article, FaqItem, MediaItem, Reportage, Review, SiteData } from '@/types/content';
 
 const base = (process.env.WORDPRESS_URL || 'https://aksen-photo.pl').replace(/\/+$/, '');
 
@@ -7,54 +7,13 @@ async function request<T>(path: string, revalidate = 300): Promise<T | null> {
   try {
     const response = await fetch(`${base}${path}`, {
       next: { revalidate },
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(8000)
     });
     if (!response.ok) return null;
     return (await response.json()) as T;
   } catch {
     return null;
   }
-}
-
-export async function getSiteData(): Promise<SiteData> {
-  const data = await request<Partial<SiteData>>('/wp-json/aksen-headless/v1/site', 300);
-  if (!data) return fallbackData;
-  return {
-    ...fallbackData,
-    ...data,
-    brand: { ...fallbackData.brand, ...(data.brand || {}) },
-    offer: { ...fallbackData.offer, ...(data.offer || {}) },
-    reportages: data.reportages || [],
-    reviews: data.reviews || [],
-    faq: data.faq || fallbackData.faq,
-    articles: data.articles || [],
-    otherServices: data.otherServices || fallbackData.otherServices
-  };
-}
-
-export async function getReportages(): Promise<Reportage[]> {
-  const data = await request<Reportage[]>('/wp-json/aksen-headless/v1/reportages', 300);
-  return data || [];
-}
-
-export async function getReportage(slug: string): Promise<Reportage | null> {
-  return request<Reportage>(`/wp-json/aksen-headless/v1/reportages/${encodeURIComponent(slug)}`, 300);
-}
-
-export async function getReviews(): Promise<Review[]> {
-  return (await request<Review[]>('/wp-json/aksen-headless/v1/reviews', 600)) || [];
-}
-
-export async function getFaq(): Promise<FaqItem[]> {
-  return (await request<FaqItem[]>('/wp-json/aksen-headless/v1/faq', 600)) || fallbackData.faq;
-}
-
-export async function getArticles(): Promise<Article[]> {
-  return (await request<Article[]>('/wp-json/aksen-headless/v1/articles', 600)) || [];
-}
-
-export async function getArticle(slug: string): Promise<Article | null> {
-  return request<Article>(`/wp-json/aksen-headless/v1/articles/${encodeURIComponent(slug)}`, 600);
 }
 
 type WpRendered = { rendered?: string };
@@ -64,7 +23,13 @@ type WpSeo = {
   robots?: { index?: string; follow?: string };
   og_image?: Array<{ url?: string }>;
 };
-
+type WpMedia = {
+  id?: number;
+  source_url?: string;
+  alt_text?: string;
+  media_details?: { width?: number; height?: number };
+};
+type WpEmbedded = { 'wp:featuredmedia'?: WpMedia[] };
 type WpEntity = {
   id: number;
   slug: string;
@@ -75,13 +40,14 @@ type WpEntity = {
   excerpt?: WpRendered;
   content?: WpRendered;
   yoast_head_json?: WpSeo;
+  _embedded?: WpEmbedded;
 };
-
 type WpTerm = {
   id: number;
   slug: string;
   name: string;
   description?: string;
+  count?: number;
 };
 
 export type LegacyContent = {
@@ -133,6 +99,9 @@ function htmlToText(value = ''): string {
     .replace(/&amp;/gi, '&')
     .replace(/&quot;/gi, '"')
     .replace(/&#039;|&apos;/gi, "'")
+    .replace(/&hellip;/gi, '…')
+    .replace(/&#8211;|&ndash;/gi, '–')
+    .replace(/&#8212;|&mdash;/gi, '—')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -144,6 +113,126 @@ export function sanitizeLegacyHtml(value = ''): string {
     .replace(/<embed\b[^>]*\/?\s*>/gi, '')
     .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/javascript\s*:/gi, '');
+}
+
+function featuredMedia(item: WpEntity): MediaItem | undefined {
+  const media = item._embedded?.['wp:featuredmedia']?.[0];
+  const url = media?.source_url || item.yoast_head_json?.og_image?.[0]?.url;
+  if (!url) return undefined;
+  return {
+    id: media?.id || `${item.id}-featured`,
+    url,
+    alt: media?.alt_text || htmlToText(item.title?.rendered || item.slug),
+    width: media?.media_details?.width,
+    height: media?.media_details?.height
+  };
+}
+
+function toReportage(item: WpEntity): Reportage {
+  return {
+    id: item.id,
+    slug: item.slug,
+    title: htmlToText(item.title?.rendered || item.slug),
+    excerpt: htmlToText(item.excerpt?.rendered || ''),
+    date: item.date,
+    hero: featuredMedia(item),
+    gallery: [],
+    content: sanitizeLegacyHtml(item.content?.rendered || '')
+  };
+}
+
+function toArticle(item: WpEntity): Article {
+  return {
+    id: item.id,
+    slug: item.slug,
+    title: htmlToText(item.title?.rendered || item.slug),
+    excerpt: htmlToText(item.excerpt?.rendered || ''),
+    content: sanitizeLegacyHtml(item.content?.rendered || ''),
+    hero: featuredMedia(item),
+    date: item.date
+  };
+}
+
+async function getTerm(kind: 'category' | 'tag', slug: string): Promise<WpTerm | null> {
+  const endpoint = kind === 'category' ? 'categories' : 'tags';
+  const terms = await request<WpTerm[]>(
+    `/wp-json/wp/v2/${endpoint}?slug=${encodeURIComponent(slug)}&_fields=id,slug,name,description,count`,
+    1800
+  );
+  return terms?.[0] || null;
+}
+
+async function getPostsForCategory(slug: string, revalidate = 300): Promise<WpEntity[]> {
+  const term = await getTerm('category', slug);
+  if (!term) return [];
+  return (
+    (await request<WpEntity[]>(
+      `/wp-json/wp/v2/posts?categories=${term.id}&per_page=100&_embed=wp:featuredmedia&_fields=id,slug,link,date,modified,title,excerpt,content,yoast_head_json,_embedded`,
+      revalidate
+    )) || []
+  );
+}
+
+async function getWpPostBySlug(slug: string, revalidate = 300): Promise<WpEntity | null> {
+  const items = await request<WpEntity[]>(
+    `/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&per_page=1&_embed=wp:featuredmedia&_fields=id,slug,link,date,modified,title,excerpt,content,yoast_head_json,_embedded`,
+    revalidate
+  );
+  return items?.[0] || null;
+}
+
+export async function getReportages(): Promise<Reportage[]> {
+  const custom = await request<Reportage[]>('/wp-json/aksen-headless/v1/reportages', 300);
+  if (custom?.length) return custom;
+  return (await getPostsForCategory('reportaz-slubny', 300)).map(toReportage);
+}
+
+export async function getReportage(slug: string): Promise<Reportage | null> {
+  const custom = await request<Reportage>(`/wp-json/aksen-headless/v1/reportages/${encodeURIComponent(slug)}`, 300);
+  if (custom) return custom;
+  const item = await getWpPostBySlug(slug, 300);
+  return item ? toReportage(item) : null;
+}
+
+export async function getReviews(): Promise<Review[]> {
+  return (await request<Review[]>('/wp-json/aksen-headless/v1/reviews', 600)) || [];
+}
+
+export async function getFaq(): Promise<FaqItem[]> {
+  return (await request<FaqItem[]>('/wp-json/aksen-headless/v1/faq', 600)) || fallbackData.faq;
+}
+
+export async function getArticles(): Promise<Article[]> {
+  const custom = await request<Article[]>('/wp-json/aksen-headless/v1/articles', 600);
+  if (custom?.length) return custom;
+  return (await getPostsForCategory('poradnik', 600)).map(toArticle);
+}
+
+export async function getArticle(slug: string): Promise<Article | null> {
+  const custom = await request<Article>(`/wp-json/aksen-headless/v1/articles/${encodeURIComponent(slug)}`, 600);
+  if (custom) return custom;
+  const item = await getWpPostBySlug(slug, 600);
+  return item ? toArticle(item) : null;
+}
+
+export async function getSiteData(): Promise<SiteData> {
+  const data = await request<Partial<SiteData>>('/wp-json/aksen-headless/v1/site', 300);
+  const [reportages, articles] = await Promise.all([
+    data?.reportages?.length ? Promise.resolve(data.reportages) : getReportages(),
+    data?.articles?.length ? Promise.resolve(data.articles) : getArticles()
+  ]);
+
+  return {
+    ...fallbackData,
+    ...(data || {}),
+    brand: { ...fallbackData.brand, ...(data?.brand || {}) },
+    offer: { ...fallbackData.offer, ...(data?.offer || {}) },
+    reportages,
+    reviews: data?.reviews || fallbackData.reviews,
+    faq: data?.faq || fallbackData.faq,
+    articles,
+    otherServices: data?.otherServices || fallbackData.otherServices
+  };
 }
 
 function toLegacyContent(item: WpEntity): LegacyContent {
@@ -160,7 +249,7 @@ function toLegacyContent(item: WpEntity): LegacyContent {
     seoDescription: seo?.description ? htmlToText(seo.description) : undefined,
     noIndex: seo?.robots?.index === 'noindex',
     noFollow: seo?.robots?.follow === 'nofollow',
-    image: seo?.og_image?.[0]?.url
+    image: featuredMedia(item)?.url
   };
 }
 
@@ -176,7 +265,7 @@ async function findWpEntity(path: string): Promise<WpEntity | null> {
   ]);
 
   const candidates = [...(pages || []), ...(posts || [])];
-  return candidates.find(item => normalizedPath(item.link) === wanted) || candidates[0] || null;
+  return candidates.find(item => normalizedPath(item.link) === wanted) || null;
 }
 
 export async function getLegacyContent(path: string): Promise<LegacyContent | null> {
@@ -199,13 +288,14 @@ export async function getLegacyArchive(path: string): Promise<LegacyArchive | nu
   const parsed = parseArchivePath(path);
   if (!parsed) return null;
 
-  const termEndpoint = parsed.kind === 'category' ? 'categories' : 'tags';
-  const terms = await request<WpTerm[]>(`/wp-json/wp/v2/${termEndpoint}?slug=${encodeURIComponent(parsed.slug)}&_fields=id,slug,name,description`, 600);
-  const term = terms?.[0];
+  const term = await getTerm(parsed.kind, parsed.slug);
   if (!term) return null;
 
   const filter = parsed.kind === 'category' ? 'categories' : 'tags';
-  const posts = await request<WpEntity[]>(`/wp-json/wp/v2/posts?${filter}=${term.id}&page=${parsed.page}&per_page=12&_fields=id,slug,link,date,modified,title,excerpt,content,yoast_head_json`, 300);
+  const posts = await request<WpEntity[]>(
+    `/wp-json/wp/v2/posts?${filter}=${term.id}&page=${parsed.page}&per_page=12&_fields=id,slug,link,date,modified,title,excerpt,content,yoast_head_json`,
+    300
+  );
   if (!posts) return null;
 
   return {
@@ -222,7 +312,24 @@ export async function getLegacyArchive(path: string): Promise<LegacyArchive | nu
 async function fetchWpCollection(endpoint: 'posts' | 'pages'): Promise<WpEntity[]> {
   const items: WpEntity[] = [];
   for (let page = 1; page <= 20; page += 1) {
-    const batch = await request<WpEntity[]>(`/wp-json/wp/v2/${endpoint}?page=${page}&per_page=100&_fields=id,slug,link,date,modified`, 1800);
+    const batch = await request<WpEntity[]>(
+      `/wp-json/wp/v2/${endpoint}?page=${page}&per_page=100&_fields=id,slug,link,date,modified`,
+      1800
+    );
+    if (!batch?.length) break;
+    items.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return items;
+}
+
+async function fetchTerms(endpoint: 'categories' | 'tags'): Promise<WpTerm[]> {
+  const items: WpTerm[] = [];
+  for (let page = 1; page <= 10; page += 1) {
+    const batch = await request<WpTerm[]>(
+      `/wp-json/wp/v2/${endpoint}?page=${page}&per_page=100&_fields=id,slug,name,count`,
+      1800
+    );
     if (!batch?.length) break;
     items.push(...batch);
     if (batch.length < 100) break;
@@ -231,7 +338,12 @@ async function fetchWpCollection(endpoint: 'posts' | 'pages'): Promise<WpEntity[
 }
 
 export async function getLegacySitemapEntries(): Promise<LegacySitemapEntry[]> {
-  const [posts, pages] = await Promise.all([fetchWpCollection('posts'), fetchWpCollection('pages')]);
+  const [posts, pages, categories, tags] = await Promise.all([
+    fetchWpCollection('posts'),
+    fetchWpCollection('pages'),
+    fetchTerms('categories'),
+    fetchTerms('tags')
+  ]);
   const seen = new Set<string>();
   const result: LegacySitemapEntry[] = [];
 
@@ -240,6 +352,22 @@ export async function getLegacySitemapEntries(): Promise<LegacySitemapEntry[]> {
     if (seen.has(path)) continue;
     seen.add(path);
     result.push({ path, modified: item.modified || item.date });
+  }
+
+  for (const term of categories) {
+    if ((term.count || 0) <= 0) continue;
+    const path = `/category/${term.slug}`;
+    if (seen.has(path)) continue;
+    seen.add(path);
+    result.push({ path });
+  }
+
+  for (const term of tags) {
+    if ((term.count || 0) <= 0) continue;
+    const path = `/tag/${term.slug}`;
+    if (seen.has(path)) continue;
+    seen.add(path);
+    result.push({ path });
   }
 
   return result;
