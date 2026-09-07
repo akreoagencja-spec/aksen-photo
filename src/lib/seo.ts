@@ -3,8 +3,11 @@ import type { Metadata } from 'next';
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://aksen-photo.pl').replace(/\/+$/, '');
 export const INDEXING_ENABLED = process.env.ALLOW_INDEXING === 'true';
 
+type SupportedOpenGraphType = 'website' | 'article' | 'profile';
+
 type MetadataOverrides = {
   canonical?: string;
+  openGraphType?: string;
   openGraphTitle?: string;
   openGraphDescription?: string;
   openGraphImage?: string;
@@ -31,6 +34,11 @@ function canonicalUrl(path: string, candidate?: string) {
   } catch {
     return fallback;
   }
+}
+
+function openGraphType(value?: string): SupportedOpenGraphType {
+  if (value === 'article' || value === 'profile') return value;
+  return 'website';
 }
 
 export function metadata(
@@ -60,7 +68,7 @@ export function metadata(
         }
       : { index: false, follow: false, nocache: true },
     openGraph: {
-      type: 'website',
+      type: openGraphType(overrides.openGraphType),
       title: ogTitle,
       description: ogDescription,
       url,
