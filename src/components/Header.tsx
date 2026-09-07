@@ -33,7 +33,7 @@ export function Header() {
         </Link>
 
         <nav className="desktop-nav" aria-label="Główna nawigacja">
-          {originalSite.nav.map(item => item.children ? (
+          {originalSite.nav.map(item => 'children' in item && item.children ? (
             <div className="nav-dropdown" key={item.label}>
               <Link href={item.href} className="nav-dropdown-trigger">{item.label}<span aria-hidden="true">⌄</span></Link>
               <div className="nav-dropdown-menu">
@@ -52,7 +52,7 @@ export function Header() {
           <summary aria-label="Otwórz menu"><span>Menu</span><span className="menu-bars" aria-hidden="true">☰</span></summary>
           <div className="mobile-menu-panel">
             <nav aria-label="Nawigacja mobilna">
-              {originalSite.nav.map(item => item.children ? (
+              {originalSite.nav.map(item => 'children' in item && item.children ? (
                 <details className="mobile-submenu" key={item.label}>
                   <summary>{item.label}</summary>
                   <div>
