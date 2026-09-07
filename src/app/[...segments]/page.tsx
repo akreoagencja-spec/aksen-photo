@@ -2,7 +2,7 @@ import { cache } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getLegacyArchive, getLegacyContent } from '@/lib/wp';
-import { INDEXING_ENABLED, metadata as makeMetadata } from '@/lib/seo';
+import { metadata as makeMetadata } from '@/lib/seo';
 
 const loadLegacyContent = cache((path: string) => getLegacyContent(path));
 const loadLegacyArchive = cache((path: string) => getLegacyArchive(path));
@@ -36,24 +36,25 @@ export async function generateMetadata({ params }: { params: Promise<{ segments:
   const item = exactLegacyItem(rawItem, path);
 
   if (item) {
-    const meta = makeMetadata(
+    return makeMetadata(
       item.seoTitle || item.title,
       item.seoDescription || item.excerpt || item.title,
       path,
-      item.image
-    );
-
-    if (INDEXING_ENABLED && (item.noIndex || item.noFollow)) {
-      return {
-        ...meta,
+      item.ogImage || item.image,
+      {
+        canonical: item.canonical,
+        openGraphTitle: item.ogTitle,
+        openGraphDescription: item.ogDescription,
+        openGraphImage: item.ogImage || item.image,
+        twitterTitle: item.twitterTitle,
+        twitterDescription: item.twitterDescription,
+        twitterImage: item.twitterImage,
         robots: {
           index: !item.noIndex,
           follow: !item.noFollow
         }
-      };
-    }
-
-    return meta;
+      }
+    );
   }
 
   if (archive) {
