@@ -1,6 +1,7 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import './globals.css';
+import './liquid-glass.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getSiteData } from '@/lib/wp';
@@ -11,6 +12,13 @@ import { INDEXING_ENABLED, SITE_URL } from '@/lib/seo';
 import { originalSite } from '@/lib/original-site';
 
 const cookieYesId = process.env.NEXT_PUBLIC_COOKIEYES_ID || '';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#f7f9fc'
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
