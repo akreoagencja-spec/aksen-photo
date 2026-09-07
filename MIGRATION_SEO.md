@@ -35,6 +35,13 @@ Before merge/cutover:
 - Contact form, consent, GA4 and Meta events are checked.
 - Production backup and rollback procedure are verified.
 
+## Git/Vercel staging workflow
+
+- Development remains on `feat/seo-preservation-next-pro` until staging QA is complete.
+- Every commit on the feature branch should create a Vercel Preview deployment through the Git integration.
+- Preview deployments must keep `ALLOW_INDEXING=false`.
+- A Git-triggered Preview deployment is required before the full 858-URL regression is run.
+
 ## Cutover rule
 
 Do not change the production DNS until every release gate above is green.
