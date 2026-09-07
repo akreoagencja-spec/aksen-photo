@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { getArticles, getLegacySitemapEntries, getReportages } from '@/lib/wp';
+import { getLegacySitemapEntries } from '@/lib/wp';
+import { getPublicArticles, getPublicReportages } from '@/lib/wp-public';
 import { SITE_URL } from '@/lib/seo';
 
 const WORDPRESS_URL = (process.env.WORDPRESS_URL || 'https://aksen-photo.pl').replace(/\/+$/, '');
@@ -54,8 +55,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const [reportages, articles, legacyEntries, categoryPaths, tagPaths] = await Promise.all([
-    getReportages(),
-    getArticles(),
+    getPublicReportages(),
+    getPublicArticles(),
     getLegacySitemapEntries(),
     getLegacyTermPaths('categories', 'category'),
     getLegacyTermPaths('tags', 'tag')
@@ -73,7 +74,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   for (const item of reportages) {
-    const url = absoluteUrl(`/reportaze/${item.slug}/`);
+    const url = absoluteUrl(`/${item.slug}/`);
     entries.set(url, {
       url,
       lastModified: item.date ? new Date(item.date) : undefined,
