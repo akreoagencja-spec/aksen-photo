@@ -1,5 +1,18 @@
 import type { NextConfig } from 'next';
 
+const wordpressUrl = (process.env.WORDPRESS_URL || '').replace(/\/+$/, '');
+const productionHosts = new Set(['aksen-photo.pl', 'www.aksen-photo.pl']);
+
+function externalCmsUrl() {
+  if (!wordpressUrl) return '';
+  try {
+    const url = new URL(wordpressUrl);
+    return productionHosts.has(url.hostname) ? '' : url.toString().replace(/\/+$/, '');
+  } catch {
+    return '';
+  }
+}
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
@@ -12,6 +25,16 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'fotografslubny.szczecin.pl', pathname: '/wp-content/uploads/**' },
       { protocol: 'https', hostname: 'cms.fotografslubny.szczecin.pl', pathname: '/wp-content/uploads/**' }
     ]
+  },
+  async rewrites() {
+    const cms = externalCmsUrl();
+    if (!cms) return [];
+    return [
+      {
+        source: '/wp-content/uploads/:path*',
+        destination: `${cms}/wp-content/uploads/:path*`
+      }
+    ];
   },
   async headers() {
     return [
