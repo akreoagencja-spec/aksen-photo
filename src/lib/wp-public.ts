@@ -122,7 +122,7 @@ async function postsForCategory(slug: string): Promise<WpPost[]> {
 
   return (
     (await request<WpPost[]>(
-      `/wp-json/wp/v2/posts?categories=${id}&per_page=100&orderby=date&order=desc&_embed=wp:featuredmedia`,
+      `/wp-json/wp/v2/posts?categories=${id}&per_page=100&orderby=date&order=desc&_embed=wp:featuredmedia&_fields=id,slug,link,date,title,excerpt,_links,_embedded`,
       300
     )) || []
   );
@@ -133,7 +133,7 @@ async function postForCategory(categorySlug: string, postSlug: string): Promise<
   if (!id) return null;
 
   const posts = await request<WpPost[]>(
-    `/wp-json/wp/v2/posts?categories=${id}&slug=${encodeURIComponent(postSlug)}&per_page=1&_embed=wp:featuredmedia`,
+    `/wp-json/wp/v2/posts?categories=${id}&slug=${encodeURIComponent(postSlug)}&per_page=1&_embed=wp:featuredmedia&_fields=id,slug,link,date,title,excerpt,content,_links,_embedded`,
     300
   );
   return posts?.[0] || null;
