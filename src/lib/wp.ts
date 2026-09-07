@@ -167,7 +167,7 @@ async function getPostsForCategory(slug: string, revalidate = 300): Promise<WpEn
   if (!term) return [];
   return (
     (await request<WpEntity[]>(
-      `/wp-json/wp/v2/posts?categories=${term.id}&per_page=100&_embed=wp:featuredmedia&_fields=id,slug,link,date,modified,title,excerpt,yoast_head_json,_embedded`,
+      `/wp-json/wp/v2/posts?categories=${term.id}&per_page=100&_embed=wp:featuredmedia&_fields=id,slug,link,date,modified,title,excerpt,yoast_head_json,_links,_embedded`,
       revalidate
     )) || []
   );
@@ -175,7 +175,7 @@ async function getPostsForCategory(slug: string, revalidate = 300): Promise<WpEn
 
 async function getWpPostBySlug(slug: string, revalidate = 300): Promise<WpEntity | null> {
   const items = await request<WpEntity[]>(
-    `/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&per_page=1&_embed=wp:featuredmedia&_fields=id,slug,link,date,modified,title,excerpt,content,yoast_head_json,_embedded`,
+    `/wp-json/wp/v2/posts?slug=${encodeURIComponent(slug)}&per_page=1&_embed=wp:featuredmedia&_fields=id,slug,link,date,modified,title,excerpt,content,yoast_head_json,_links,_embedded`,
     revalidate
   );
   return items?.[0] || null;
