@@ -41,7 +41,7 @@ export default async function HomePage() {
           <div>
             <p className="body-large">{originalSite.hero.text}</p>
             <p>{data.brand.intro}</p>
-            <Link className="text-link" href="/o-mnie-fotograf-szczecin/">Więcej o mnie →</Link>
+            <Link className="text-link" href="/o-mnie-fotograf-szczecin/" prefetch={false}>Więcej o mnie →</Link>
           </div>
         </div>
       </section>
@@ -77,7 +77,7 @@ export default async function HomePage() {
             <div className="empty-state">Reportaże pojawią się automatycznie z obecnego WordPressa.</div>
           )}
           <div className="actions">
-            <Link className="button" href="/portfolio-slubne-aksen-photo-fotograf-slubny/">Zobacz portfolio ślubne</Link>
+            <Link className="button" href="/portfolio-slubne-aksen-photo-fotograf-slubny/" prefetch={false}>Zobacz portfolio ślubne</Link>
           </div>
         </div>
       </section>
@@ -98,7 +98,7 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="actions">
-            <Link className="text-link" href="/o-mnie-fotograf-szczecin/#opinie">Zobacz więcej opinii →</Link>
+            <Link className="text-link" href="/o-mnie-fotograf-szczecin/#opinie" prefetch={false}>Zobacz więcej opinii →</Link>
           </div>
         </div>
       </section>
@@ -112,7 +112,7 @@ export default async function HomePage() {
           </div>
           <div className="photo-service-grid">
             {originalSite.services.map(item => (
-              <Link className="photo-service-card" href={item.href} key={item.href}>
+              <Link className="photo-service-card" href={item.href} prefetch={false} key={item.href}>
                 <Image src={item.image} alt={item.label} fill sizes="(max-width: 640px) 100vw, (max-width: 1000px) 50vw, 33vw" />
                 <span className="photo-service-shade" />
                 <span className="photo-service-title">{item.label}</span>
@@ -136,7 +136,7 @@ export default async function HomePage() {
       <section className="section muted-section">
         <div className="shell split">
           <div><p className="eyebrow">O mnie</p><h2 className="quote-big">Fotografia ma cofać czas, nie pokazywać modny filtr.</h2></div>
-          <div><p className="body-large">{data.brand.about}</p><Link className="text-link" href="/o-mnie-fotograf-szczecin/">Poznaj mnie lepiej →</Link></div>
+          <div><p className="body-large">{data.brand.about}</p><Link className="text-link" href="/o-mnie-fotograf-szczecin/" prefetch={false}>Poznaj mnie lepiej →</Link></div>
         </div>
       </section>
 
@@ -149,7 +149,7 @@ export default async function HomePage() {
             <ul className="offer-list">{data.offer.bullets.map(item => <li key={item}>{item}</li>)}</ul>
             <p><strong>{data.offer.videoBonus}</strong></p>
             <div className="actions">
-              <Link className="button button-light" href="/portfolio-slubne-aksen-photo-fotograf-slubny/">Fotografia ślubna</Link>
+              <Link className="button button-light" href="/portfolio-slubne-aksen-photo-fotograf-slubny/" prefetch={false}>Fotografia ślubna</Link>
               <Link className="text-link light" href="/rezerwacja">Sprawdź termin →</Link>
             </div>
           </div>
@@ -172,7 +172,7 @@ export default async function HomePage() {
             <p>{originalSite.contact.location} · {originalSite.contact.phoneDisplay} · {originalSite.contact.email}</p>
           </div>
           <div className="actions">
-            <Link className="button" href="/kontakt-fotograf-szczecin-aksen-photo/">Napisz do mnie</Link>
+            <Link className="button" href="/kontakt-fotograf-szczecin-aksen-photo/" prefetch={false}>Napisz do mnie</Link>
             <a className="text-link" href={originalSite.contact.phoneHref}>Zadzwoń →</a>
           </div>
         </div>
