@@ -36,12 +36,12 @@ export function Header() {
         <nav className="desktop-nav" aria-label="Główna nawigacja">
           {originalSite.nav.map(item => 'children' in item && item.children ? (
             <div className="nav-dropdown" key={item.label}>
-              <Link href={item.href} className="nav-dropdown-trigger">{item.label}<span aria-hidden="true">⌄</span></Link>
+              <Link href={item.href} prefetch={false} className="nav-dropdown-trigger">{item.label}<span aria-hidden="true">⌄</span></Link>
               <div className="nav-dropdown-menu">
-                {item.children.map(child => <Link key={child.href} href={child.href}>{child.label}</Link>)}
+                {item.children.map(child => <Link key={child.href} href={child.href} prefetch={false}>{child.label}</Link>)}
               </div>
             </div>
-          ) : <Link key={item.href} href={item.href}>{item.label}</Link>)}
+          ) : <Link key={item.href} href={item.href} prefetch={false}>{item.label}</Link>)}
         </nav>
 
         <div className="header-actions">
@@ -57,10 +57,10 @@ export function Header() {
                 <details className="mobile-submenu" key={item.label}>
                   <summary>{item.label}</summary>
                   <div>
-                    {item.children.map(child => <Link key={child.href} href={child.href}>{child.label}</Link>)}
+                    {item.children.map(child => <Link key={child.href} href={child.href} prefetch={false}>{child.label}</Link>)}
                   </div>
                 </details>
-              ) : <Link key={item.href} href={item.href}>{item.label}</Link>)}
+              ) : <Link key={item.href} href={item.href} prefetch={false}>{item.label}</Link>)}
             </nav>
             <Link className="button mobile-booking" href="/rezerwacja">Sprawdź termin</Link>
             <SocialLinks />
