@@ -33,17 +33,17 @@ export function Footer({ phone, email }: { phone: string; email: string }) {
           <p className="footer-heading">Menu</p>
           <nav className="footer-links" aria-label="Menu w stopce">
             <Link href="/">Strona Główna</Link>
-            <Link href="/o-mnie-fotograf-szczecin/">O mnie</Link>
+            <Link href="/o-mnie-fotograf-szczecin/" prefetch={false}>O mnie</Link>
             <Link href="/#wybierz-fotografie">Oferta</Link>
-            <Link href="/blog-fotograficzny/">Blog</Link>
-            <Link href="/kontakt-fotograf-szczecin-aksen-photo/">Kontakt</Link>
+            <Link href="/blog-fotograficzny/" prefetch={false}>Blog</Link>
+            <Link href="/kontakt-fotograf-szczecin-aksen-photo/" prefetch={false}>Kontakt</Link>
           </nav>
         </div>
 
         <div className="footer-offer-column">
           <p className="footer-heading">Oferta</p>
           <nav className="footer-links footer-offer-links" aria-label="Kategorie fotografii">
-            {offerNav.map(item => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+            {offerNav.map(item => <Link key={item.href} href={item.href} prefetch={false}>{item.label}</Link>)}
           </nav>
         </div>
       </div>
@@ -51,7 +51,7 @@ export function Footer({ phone, email }: { phone: string; email: string }) {
       <div className="shell footer-bottom">
         <span>© {new Date().getFullYear()} Aksen Photo</span>
         <div>
-          {originalSite.legal.map(item => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+          {originalSite.legal.map(item => <Link key={item.href} href={item.href} prefetch={false}>{item.label}</Link>)}
         </div>
       </div>
     </footer>
