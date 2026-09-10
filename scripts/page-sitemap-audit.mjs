@@ -11,7 +11,7 @@ async function fetchWithTimeout(url, options = {}) {
     return await fetch(url, {
       ...options,
       headers: {
-        'user-agent': 'AksenPhoto-Page-Sitemap-Audit/1.0',
+        'user-agent': 'AksenPhoto-Page-Sitemap-Audit/1.1',
         ...(options.headers || {})
       },
       signal: controller.signal
@@ -40,6 +40,10 @@ function text(value = '') {
     .trim();
 }
 
+function count(html, pattern) {
+  return html ? [...html.matchAll(pattern)].length : 0;
+}
+
 function extractCanonical(html) {
   const match = html.match(/<link\b[^>]*rel=["'][^"']*canonical[^"']*["'][^>]*href=["']([^"']+)["'][^>]*>|<link\b[^>]*href=["']([^"']+)["'][^>]*rel=["'][^"']*canonical[^"']*["'][^>]*>/i);
   return match ? (match[1] || match[2] || null) : null;
@@ -53,6 +57,23 @@ function extractMetaRobots(html) {
 function extractTitle(html) {
   const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   return match ? text(match[1]) : null;
+}
+
+function detectFunctionalMarkers(html) {
+  const lower = html.toLowerCase();
+  const known = [
+    'wpforms',
+    'fluentform',
+    'contact-form-7',
+    'wpcf7',
+    'elementor-form',
+    'woocommerce',
+    'wspomn',
+    'wydarzen',
+    'guestbook',
+    'event'
+  ];
+  return known.filter(marker => lower.includes(marker));
 }
 
 async function inspect(url) {
@@ -71,6 +92,11 @@ async function inspect(url) {
       ? [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/gi)].map(match => text(match[1])).filter(Boolean)
       : [];
     const bodyText = html ? text(html) : '';
+    const formCount = count(html, /<form\b/gi);
+    const inputCount = count(html, /<(?:input|textarea|select)\b/gi);
+    const iframeCount = count(html, /<iframe\b/gi);
+    const buttonCount = count(html, /<button\b/gi);
+    const functionalMarkers = detectFunctionalMarkers(html);
     return {
       path: requested.pathname,
       status: response.status,
@@ -80,7 +106,12 @@ async function inspect(url) {
       title: html ? extractTitle(html) : null,
       h1,
       textLength: bodyText.length,
-      bodySample: bodyText.slice(0, 450)
+      formCount,
+      inputCount,
+      iframeCount,
+      buttonCount,
+      functionalMarkers,
+      bodySample: bodyText.slice(0, 1600)
     };
   } catch (error) {
     return {
@@ -110,8 +141,16 @@ const suspicious = checks.filter(check => {
   if (!check.title || !check.canonical) return true;
   if ((check.h1 || []).length !== 1) return true;
   if ((check.textLength || 0) < 600) return true;
+  if ((check.formCount || 0) > 0 || (check.inputCount || 0) > 0) return true;
   return false;
 });
+
+const functional = checks.filter(check =>
+  (check.formCount || 0) > 0 ||
+  (check.inputCount || 0) > 0 ||
+  (check.iframeCount || 0) > 0 ||
+  (check.functionalMarkers || []).length > 0
+);
 
 const report = {
   generatedAt: new Date().toISOString(),
@@ -119,15 +158,18 @@ const report = {
   sitemap: sitemapUrl,
   count: checks.length,
   suspiciousCount: suspicious.length,
+  functionalCount: functional.length,
   checks,
-  suspicious
+  suspicious,
+  functional
 };
 
 await writeFile(out, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
-console.log(`Page sitemap audit: ${checks.length} pages; ${suspicious.length} require review.`);
+console.log(`Page sitemap audit: ${checks.length} pages; ${suspicious.length} require review; ${functional.length} have functional markers.`);
 for (const check of suspicious) {
-  console.log(`${String(check.status).padStart(3)} ${check.path} h1=${check.h1?.length ?? '-'} text=${check.textLength ?? '-'}`);
+  console.log(`${String(check.status).padStart(3)} ${check.path} h1=${check.h1?.length ?? '-'} text=${check.textLength ?? '-'} forms=${check.formCount ?? '-'} inputs=${check.inputCount ?? '-'}`);
   if (check.location) console.log(`    location: ${check.location}`);
   if (check.canonical) console.log(`    canonical: ${check.canonical}`);
+  if (check.functionalMarkers?.length) console.log(`    markers: ${check.functionalMarkers.join(', ')}`);
 }
 console.log(`Report written to: ${out}`);
