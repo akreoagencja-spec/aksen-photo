@@ -47,8 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/oferta/',
     '/opinie/',
     '/faq/',
-    '/rezerwacja/',
-    '/poradnik/'
+    '/rezerwacja/'
   ];
 
   const [reportages, articles, legacyEntries, categoryPaths, tagPaths] = await Promise.all([
