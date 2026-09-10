@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "seo:inventory": "node scripts/seo-regression.mjs --source=https://aksen-photo.pl --inventory-only --out=seo-baseline.json",
     "seo:provenance": "node scripts/sitemap-provenance.mjs",
+    "seo:priority": "node scripts/priority-url-audit.mjs",
     "seo:regression": "node scripts/seo-regression.mjs"
   },
   "dependencies": {
