@@ -15,12 +15,35 @@ export const metadata = makeMetadata(
   originalSite.ogImage
 );
 
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': 'https://aksen-photo.pl/#organization',
+  name: 'Aksen Photo',
+  url: 'https://aksen-photo.pl/',
+  logo: originalSite.logo.src,
+  image: originalSite.ogImage,
+  description: originalSite.homeSeo.description,
+  email: originalSite.contact.email,
+  telephone: originalSite.contact.phoneDisplay,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Szczecin',
+    addressCountry: 'PL'
+  },
+  sameAs: originalSite.social.map(item => item.href)
+};
+
 export default async function HomePage() {
   const [data, publicReportages] = await Promise.all([getSiteData(), getPublicReportages()]);
   const featured = (data.reportages.length ? data.reportages : publicReportages).slice(0, 5);
 
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
       <Hero />
 
       <section className="trust-strip" aria-label="Aksen Photo w skrócie">
