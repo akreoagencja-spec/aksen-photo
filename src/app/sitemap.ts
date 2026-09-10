@@ -1,13 +1,12 @@
 import type { MetadataRoute } from 'next';
-import { getArticles, getReportages } from '@/lib/wp';
+import { getProductionSitemapPaths } from '@/lib/cms-v2';
+import { siteV2 } from '@/lib/site-v2';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://fotografslubny.szczecin.pl';
-  const staticPaths = ['', '/reportaze', '/oferta', '/o-mnie', '/opinie', '/faq', '/poradnik', '/kontakt', '/rezerwacja', '/polityka-prywatnosci'];
-  const [reportages, articles] = await Promise.all([getReportages(), getArticles()]);
-  return [
-    ...staticPaths.map(path => ({ url: `${base}${path}`, lastModified: new Date(), changeFrequency: path === '' ? 'weekly' as const : 'monthly' as const, priority: path === '' ? 1 : .7 })),
-    ...reportages.map(item => ({ url: `${base}/reportaze/${item.slug}`, lastModified: item.date ? new Date(item.date) : new Date(), changeFrequency: 'monthly' as const, priority: .8 })),
-    ...articles.map(item => ({ url: `${base}/poradnik/${item.slug}`, lastModified: item.date ? new Date(item.date) : new Date(), changeFrequency: 'monthly' as const, priority: .65 }))
-  ];
+  const paths = await getProductionSitemapPaths();
+  return paths.map(path => ({
+    url: `${siteV2.url}${path === '/' ? '/' : `${path}/`}`.replace(/([^:]\/)\/+/, '$1'),
+    changeFrequency: path === '/' ? 'weekly' : 'monthly',
+    priority: path === '/' ? 1 : path.startsWith('/tag/') ? 0.25 : path.startsWith('/category/') ? 0.45 : 0.7
+  }));
 }
