@@ -51,6 +51,14 @@ jobs:
       - name: Package WordPress bridge
         run: cd wordpress-plugin && zip -rq ../aksen-headless-bridge-1.1.0.zip aksen-headless-bridge
 
+      - name: Upload generated dependency lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-lock-candidate
+          path: package-lock.json
+          retention-days: 3
+          if-no-files-found: error
+
       - name: Upload WordPress bridge
         uses: actions/upload-artifact@v4
         with:
