@@ -45,13 +45,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/',
     '/reportaze/',
     '/oferta/',
-    '/o-mnie/',
     '/opinie/',
     '/faq/',
-    '/blog/',
-    '/kontakt/',
     '/rezerwacja/',
-    '/polityka-prywatnosci/'
+    '/poradnik/'
   ];
 
   const [reportages, articles, legacyEntries, categoryPaths, tagPaths] = await Promise.all([
