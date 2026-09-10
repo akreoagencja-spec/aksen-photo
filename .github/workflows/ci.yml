@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install --no-fund
+
+      - name: Dependency security audit
+        run: npm audit --audit-level=high
+
+      - name: Lint
+        run: npm run lint
+
+      - name: PHP syntax check
+        run: php -l wordpress-plugin/aksen-headless-bridge/aksen-headless-bridge.php
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://aksen-photo.pl
+          WORDPRESS_URL: https://aksen-photo.pl
+          ALLOW_INDEXING: 'false'
+        run: npm run build
+
+      - name: Build SEO baseline inventory
+        run: npm run seo:inventory
+
+      - name: Audit sitemap provenance
+        run: npm run seo:provenance
+
+      - name: Audit priority production URLs
+        run: npm run seo:priority
+
+      - name: Audit production page sitemap
+        run: node scripts/page-sitemap-audit.mjs
+
+      - name: Package WordPress bridge
+        run: cd wordpress-plugin && zip -rq ../aksen-headless-bridge-1.1.0.zip aksen-headless-bridge
+
+      - name: Upload generated dependency lock
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-lock-candidate
+          path: package-lock.json
+          retention-days: 3
+          if-no-files-found: error
+
+      - name: Upload WordPress bridge
+        uses: actions/upload-artifact@v4
+        with:
+          name: aksen-headless-bridge-1.1.0
+          path: aksen-headless-bridge-1.1.0.zip
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload SEO baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-baseline
+          path: seo-baseline.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload sitemap provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-sitemap-provenance
+          path: seo-sitemap-provenance.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload priority URL audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-priority-audit
+          path: seo-priority-audit.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload page sitemap audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-page-sitemap-audit
+          path: seo-page-sitemap-audit.json
+          retention-days: 14
+          if-no-files-found: error

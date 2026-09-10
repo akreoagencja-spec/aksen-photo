@@ -1,10 +1,7 @@
 'use client';
 
-import Script from 'next/script';
 import { useEffect } from 'react';
 import { updateGoogleConsent } from '@/lib/analytics';
-
-const cookieYesId = process.env.NEXT_PUBLIC_COOKIEYES_ID || '';
 
 export function CookieConsentBridge() {
   useEffect(() => {
@@ -25,6 +22,5 @@ export function CookieConsentBridge() {
     };
   }, []);
 
-  if (!cookieYesId) return null;
-  return <Script id="cookieyes" src={`https://cdn-cookieyes.com/client_data/${cookieYesId}/script.js`} strategy="beforeInteractive" />;
+  return null;
 }
