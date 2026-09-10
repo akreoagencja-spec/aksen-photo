@@ -54,6 +54,9 @@ jobs:
       - name: Audit priority production URLs
         run: npm run seo:priority
 
+      - name: Audit production page sitemap
+        run: node scripts/page-sitemap-audit.mjs
+
       - name: Package WordPress bridge
         run: cd wordpress-plugin && zip -rq ../aksen-headless-bridge-1.1.0.zip aksen-headless-bridge
 
@@ -94,5 +97,13 @@ jobs:
         with:
           name: seo-priority-audit
           path: seo-priority-audit.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload page sitemap audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-page-sitemap-audit
+          path: seo-page-sitemap-audit.json
           retention-days: 14
           if-no-files-found: error
