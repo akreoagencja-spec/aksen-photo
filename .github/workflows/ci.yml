@@ -35,6 +35,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: PHP syntax check
+        run: php -l wordpress-plugin/aksen-headless-bridge/aksen-headless-bridge.php
+
       - name: Build
         env:
           NEXT_PUBLIC_SITE_URL: https://aksen-photo.pl
@@ -44,6 +47,17 @@ jobs:
 
       - name: Build SEO baseline inventory
         run: npm run seo:inventory
+
+      - name: Package WordPress bridge
+        run: cd wordpress-plugin && zip -rq ../aksen-headless-bridge-1.1.0.zip aksen-headless-bridge
+
+      - name: Upload WordPress bridge
+        uses: actions/upload-artifact@v4
+        with:
+          name: aksen-headless-bridge-1.1.0
+          path: aksen-headless-bridge-1.1.0.zip
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Upload SEO baseline
         uses: actions/upload-artifact@v4
