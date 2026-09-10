@@ -4,8 +4,10 @@ import './globals.css';
 import './liquid-glass.css';
 import './mobile-polish.css';
 import './mobile-final.css';
+import './mobile-ios26.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { MobileDock } from '@/components/MobileDock';
 import { getSiteData } from '@/lib/wp';
 import { AnalyticsProvider } from '@/components/AnalyticsProvider';
 import { CookieConsentBridge } from '@/components/CookieConsentBridge';
@@ -19,7 +21,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#f7f9fc'
+  themeColor: '#f4f7fb'
 };
 
 export const metadata: Metadata = {
@@ -72,6 +74,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <Header />
         {children}
         <Footer phone={data.brand.phone} email={data.brand.email} />
+        <MobileDock />
       </body>
     </html>
   );
