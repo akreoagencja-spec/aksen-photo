@@ -51,7 +51,7 @@ export function Footer({ phone, email }: { phone: string; email: string }) {
       <div className="shell footer-bottom">
         <span>© {new Date().getFullYear()} Aksen Photo</span>
         <div>
-          {originalSite.legal.map(item => <Link key={item.href} href={item.href} prefetch={false}>{item.label}</Link>)}
+          <Link href="/polityka-prywatnosci-plikow-cookies-fotografa/" prefetch={false}>Polityka prywatności i regulamin usług</Link>
         </div>
       </div>
     </footer>
