@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/post_grid/reportaz-slubny',
+        destination: '/category/reportaz-slubny/',
+        permanent: true
+      },
+      {
         source: '/elementor-hf/:path*',
         destination: '/',
         permanent: true
