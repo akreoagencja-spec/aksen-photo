@@ -26,6 +26,15 @@ function exactLegacyItem<T extends { path: string }>(item: T | null, requestedPa
   return normalizedRoutePath(item.path) === normalizedRoutePath(requestedPath) ? item : null;
 }
 
+function prepareLegacyHtml(value: string): string {
+  const contactCta = '<div class="legacy-form-replacement"><p>Chcesz zapytać o termin lub wycenę?</p><a class="button" href="/kontakt-fotograf-szczecin-aksen-photo/">Napisz do mnie</a></div>';
+
+  return value
+    .replace(/<h1\b([^>]*)>/gi, '<h2$1>')
+    .replace(/<\/h1>/gi, '</h2>')
+    .replace(/<form\b[^>]*>[\s\S]*?<\/form>/gi, contactCta);
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ segments: string[] }> }) {
   const { segments } = await params;
   const path = routePath(segments);
@@ -91,7 +100,7 @@ export default async function LegacyRoutePage({ params }: { params: Promise<{ se
           </div>
         </section>
         <section className="section">
-          <div className="shell rich-content" dangerouslySetInnerHTML={{ __html: item.content }} />
+          <div className="shell rich-content" dangerouslySetInnerHTML={{ __html: prepareLegacyHtml(item.content) }} />
         </section>
       </main>
     );
