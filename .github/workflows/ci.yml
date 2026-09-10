@@ -48,6 +48,9 @@ jobs:
       - name: Build SEO baseline inventory
         run: npm run seo:inventory
 
+      - name: Audit sitemap provenance
+        run: npm run seo:provenance
+
       - name: Package WordPress bridge
         run: cd wordpress-plugin && zip -rq ../aksen-headless-bridge-1.1.0.zip aksen-headless-bridge
 
@@ -72,5 +75,13 @@ jobs:
         with:
           name: seo-baseline
           path: seo-baseline.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Upload sitemap provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-sitemap-provenance
+          path: seo-sitemap-provenance.json
           retention-days: 14
           if-no-files-found: error
