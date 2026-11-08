@@ -1,0 +1,28 @@
+name: Aksen Photo service lead forms tests
+on:
+  pull_request:
+    paths:
+      - 'wordpress/aksen-atelier/inc/**'
+      - 'wordpress/aksen-atelier/assets/js/**'
+      - 'wordpress/aksen-atelier/tests/**'
+      - '.github/workflows/aksen-service-leads-ci.yml'
+  push:
+    paths:
+      - 'wordpress/aksen-atelier/inc/**'
+      - 'wordpress/aksen-atelier/assets/js/**'
+      - 'wordpress/aksen-atelier/tests/**'
+      - '.github/workflows/aksen-service-leads-ci.yml'
+
+jobs:
+  lint-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PHP syntax
+        run: php -l wordpress/aksen-atelier/inc/service-leads.php
+      - name: Check JS syntax
+        run: node --check wordpress/aksen-atelier/assets/js/aksen-lead-tracking.js
+      - name: Verify service form mapping, unique fields and attribution
+        run: php wordpress/aksen-atelier/tests/service-leads.test.php
+      - name: Verify successful lead event, deduplication and privacy
+        run: node wordpress/aksen-atelier/tests/lead-tracking.test.js
