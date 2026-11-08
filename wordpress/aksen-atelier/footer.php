@@ -11,6 +11,13 @@
   <?php get_template_part( 'partials/social-proof' ); ?>
 <?php endif; ?>
 </main>
+<style id="aksen-global-social-links-styles">
+.ap-social-links{display:flex;flex-wrap:wrap;gap:9px 13px;margin:17px 0 9px}
+.ap-social-links a,.ap-footer .ap-google-footer{display:inline-block!important;font:600 12px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.ap-social-links a:focus-visible,.ap-footer .ap-google-footer:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+.ap-footer .ap-google-footer{margin:6px 0}
+@media(max-width:550px){.ap-social-links{gap:12px 16px}}
+</style>
 <footer class="ap-footer">
   <div class="ap-container ap-footer__top">
     <div class="ap-footer__brand">
