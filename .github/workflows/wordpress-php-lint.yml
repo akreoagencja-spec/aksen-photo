@@ -1,0 +1,22 @@
+name: WordPress social-proof PHP lint
+
+on:
+  pull_request:
+    paths:
+      - 'wordpress/aksen-atelier/**'
+      - '.github/workflows/wordpress-php-lint.yml'
+  push:
+    paths:
+      - 'wordpress/aksen-atelier/**'
+      - '.github/workflows/wordpress-php-lint.yml'
+
+jobs:
+  lint:
+    name: PHP syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint staging footer
+        run: php -l wordpress/aksen-atelier/footer.php
+      - name: Lint staging social proof
+        run: php -l wordpress/aksen-atelier/partials/social-proof.php
