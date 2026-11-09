@@ -1,7 +1,7 @@
 <?php
 /**
- * Aksen Atelier — standalone classic theme for the isolated staging environment.
- * Nothing here modifies post_content, Picu collections, AIOSEO, or the source site.
+ * Aksen Atelier — portable, classic WordPress theme for Aksen Photo.
+ * Presentation and analytics code must not alter Picu, AIOSEO data, or stored post content.
  */
 declare(strict_types=1);
 defined('ABSPATH') || exit;

@@ -1,4 +1,4 @@
-Aksen Atelier 1.0.4 — selective migration release
+Aksen Atelier 1.0.5 — selective migration release
 Date: 2026-11-09
 Source: https://test.aksen-photo.pl
 Target: https://aksen-photo.pl
@@ -15,7 +15,10 @@ IMPORTANT:
 - Existing public galleries: FooGallery used on product landing, Modula on communion landing and Alpha Precision post.
 - Logo CSS references original images already in PRODUCTION media library.
 - All staging custom CSS was merged into assets/css/site.css; do not replace WordPress production custom CSS wholesale.
-- Lead JS ONLY pushes local dataLayer events. Must connect a single conversion action in GTM, observing Consent Mode v2 and avoiding duplicate Leads.
+- Conversion tracking now lives in the THEME ONLY: inc/analytics.php, assets/js/aksen-lead-tracking.js, and assets/js/aksen-analytics.js. No Aksen Core or tracking plugin, and NO GTM container required.
+- Measurement is intentionally disabled until AKSEN_ANALYTICS_ACTIVE === true in verified production server config. Google Ads AW ID/Lead label still unverified; direct Ads conversions stay disabled.
+- CookieYes is consent manager, not analytics. Its connected-web-app events or getCkyConsent API must be verified before enabling. All tags fail closed without explicit consent.
+- For legacy tags injected by other plugins, remove duplicate GA4/Meta/GTM setup before enabling code-only tracking. See ANALYTICS-CODE.md.
 - Release built from exact staging theme source; users' original media excluded.
 
 SAFE ROLLOUT:
@@ -25,6 +28,6 @@ SAFE ROLLOUT:
 4. Create service forms on production with non-conflicting IDs, verify notification recipients, remap every shortcode by service, UTM hidden fields, honeypot and token.
 5. Keep FooGallery and Modula active for legacy galleries. Check 56 existing published blog posts and 23 public pages.
 6. Assign menu and confirm link graph, 200/301 redirects where slugs differ, AIOSEO metadata, canonical URLs, sitemap, robots.
-7. Test at least one genuine non-customer submission using test data, check Fluent Forms entry, delivery, GTM custom lead event, CookieYes consent.
+7. Test at least one genuine non-customer submission using test data, check Fluent Forms entry, email delivery, the local aksen:event, CookieYes consent, GA4 generate_lead and Meta Lead in browser diagnostics. Do not count form_start or tel clicks as confirmed leads.
 8. Exclude uploads/picu/ in EWWW; selectively optimize only approved public attachments. Use existing 1024/1536/1920 variants and srcset/sizes and WebP where supported; do not overwrite originals. Before image processing, verify backup.
 9. Monitor crawl errors/analytics after switching live. Keep quick rollback to Hello Elementor.
