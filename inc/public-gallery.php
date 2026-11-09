@@ -50,13 +50,39 @@ function aksen_public_is_safe_attachment(int $id): bool {
 /** Image IDs in shortcode markup are trusted only after WP attachment validation. */
 function aksen_public_gallery_ids(string $raw): array {
     $parsed = preg_split('/[\s,]+/', trim($raw)) ?: [];
-    $ids = [];
-    foreach (array_slice($parsed, 0, 2500) as $item) {
-        if ($item === '' || !ctype_digit($item)) {
+    $candidate_ids = [];
+    foreach (array_slice($parsed, 0, 1500) as $item) {
+        if ($item === '' || !preg_match('/^[0-9]+$/D', $item)) {
             continue;
         }
         $id = (int) $item;
-        if ($id > 0 && !in_array($id, $ids, true) && aksen_public_is_safe_attachment($id)) {
+        if ($id > 0) {
+            $candidate_ids[$id] = $id;
+        }
+    }
+
+    if (!$candidate_ids) {
+        return [];
+    }
+
+    // Prime WP_Post objects and attachment meta in a single bounded database query.
+    // This avoids hundreds of individual lookups for long public galleries.
+    $posts = get_posts([
+        'post_type' => 'attachment',
+        'post_status' => 'any',
+        'post__in' => array_values($candidate_ids),
+        'orderby' => 'post__in',
+        'posts_per_page' => count($candidate_ids),
+        'no_found_rows' => true,
+        'suppress_filters' => true,
+        'update_post_meta_cache' => true,
+        'update_post_term_cache' => false,
+    ]);
+
+    $ids = [];
+    foreach ($posts as $post) {
+        $id = (int) $post->ID;
+        if (aksen_public_is_safe_attachment($id)) {
             $ids[] = $id;
         }
     }
