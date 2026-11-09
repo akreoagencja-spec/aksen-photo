@@ -1,0 +1,30 @@
+Aksen Atelier 1.0.4 — selective migration release
+Date: 2026-11-09
+Source: https://test.aksen-photo.pl
+Target: https://aksen-photo.pl
+STATUS: release theme source prepared; not activated on production.
+
+IMPORTANT:
+- This theme does NOT migrate WordPress posts, pages, database, forms, attachments, or plugin settings.
+- Do not activate on production until a VERIFIED offsite filesystem+database backup AND restore plan exists.
+- Original production Picu plugin + collections + their attachments must remain unchanged.
+- Original production Elementor/Modula/FooGallery/Fluent Forms/Picu/AIOSEO components must NOT be removed prior to functional testing.
+- A Google/Meta campaign should be enabled only after consent mode + end-to-end lead conversion tracking tests.
+- Production already has 18 Fluent Forms with entries. Service form IDs 3-19 on staging cannot be reused verbatim; migrate forms with new IDs and remap shortcodes.
+- Production has 2 sent Picu collections and 7,842 attachments in uploads/picu/. Exclude that directory from ALL image optimizers and thumbnail regeneration.
+- Existing public galleries: FooGallery used on product landing, Modula on communion landing and Alpha Precision post.
+- Logo CSS references original images already in PRODUCTION media library.
+- All staging custom CSS was merged into assets/css/site.css; do not replace WordPress production custom CSS wholesale.
+- Lead JS ONLY pushes local dataLayer events. Must connect a single conversion action in GTM, observing Consent Mode v2 and avoiding duplicate Leads.
+- Release built from exact staging theme source; users' original media excluded.
+
+SAFE ROLLOUT:
+1. Verify backup at SEOHost (database + all files, including Picu, uploads, plugin data) and restoration possibility.
+2. Install theme INACTIVE; test with temporary preview, do not delete Hello Elementor.
+3. Keep production WordPress DB, Picu, all existing media, live customer entries intact. Only copy approved page/post content per existing slug. Create new pages as needed.
+4. Create service forms on production with non-conflicting IDs, verify notification recipients, remap every shortcode by service, UTM hidden fields, honeypot and token.
+5. Keep FooGallery and Modula active for legacy galleries. Check 56 existing published blog posts and 23 public pages.
+6. Assign menu and confirm link graph, 200/301 redirects where slugs differ, AIOSEO metadata, canonical URLs, sitemap, robots.
+7. Test at least one genuine non-customer submission using test data, check Fluent Forms entry, delivery, GTM custom lead event, CookieYes consent.
+8. Exclude uploads/picu/ in EWWW; selectively optimize only approved public attachments. Use existing 1024/1536/1920 variants and srcset/sizes and WebP where supported; do not overwrite originals. Before image processing, verify backup.
+9. Monitor crawl errors/analytics after switching live. Keep quick rollback to Hello Elementor.
