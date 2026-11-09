@@ -1,9 +1,9 @@
 /**
  * Aksen Photo – client-side lead funnel for Fluent Forms.
  *
- * Emits dataLayer events ONLY. Does not initialize GA4/Google Ads/Meta or
- * store marketing cookies. Consent decisions remain the responsibility of
- * CookieYes/Google Consent Mode v2 and the configured GTM container.
+ * Emits LOCAL CustomEvents ONLY. Does not initialize GA4/Google Ads/Meta or
+ * store marketing cookies. The in-theme analytics module owns routing to
+ * vendors AFTER CookieYes consent. No GTM container or WP tracking plugin.
  *
  * Event contract:
  *   aksen_form_view     -> impression, NOT a conversion
@@ -69,15 +69,25 @@
     return result;
   }
 
+  /**
+   * Only publish a local, first-party DOM event.
+   * This is not a Google or Meta tag and does not transfer any personal data.
+   * Analytics destinations are controlled separately by the in-theme module.
+   */
   function push(name, form, extra) {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(Object.assign({
+    const payload = Object.assign({
       event: name,
       form_id: formId(form),
       service_type: currentFormService(form),
       page_path: window.location.pathname,
       lead_source: 'website'
-    }, campaign(), extra || {}));
+    }, extra || {});
+    window.dispatchEvent(new window.CustomEvent('aksen:event', { detail: payload }));
+    // Disabled by default to prevent legacy GTM containers from firing twice.
+    if (config.mirrorDataLayer === true) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(payload);
+    }
   }
 
   function writeHidden(form, name, value) {
@@ -178,13 +188,14 @@
   document.addEventListener('click', function (event) {
     const link = event.target.closest && event.target.closest('a[href^="tel:"]');
     if (!link) return;
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: 'aksen_contact_click',
-      action: 'phone',
-      service_type: String(config.service || 'sitewide'),
-      page_path: window.location.pathname
-    });
+    window.dispatchEvent(new window.CustomEvent('aksen:event', {
+      detail: {
+        event: 'aksen_contact_click',
+        action: 'phone',
+        service_type: String(config.service || 'sitewide'),
+        page_path: window.location.pathname
+      }
+    }));
   }, true);
 
   if (document.readyState === 'loading') {

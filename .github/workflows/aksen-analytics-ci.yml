@@ -1,0 +1,33 @@
+name: Aksen theme — analytics privacy and PHP smoke checks
+
+on:
+  push:
+    branches:
+      - "release/aksen-atelier-20261109-v1"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: PHP syntax
+        run: |
+          php -l functions.php
+          php -l inc/analytics.php
+          php -l page.php
+          php -l header.php
+          php -l footer.php
+      - name: JS syntax
+        run: |
+          node --check assets/js/aksen-lead-tracking.js
+          node --check assets/js/aksen-analytics.js
+      - name: Consent and conversion tests
+        run: node --test tests/analytics.test.cjs

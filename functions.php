@@ -6,6 +6,9 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
+// First-party tracking and consent bootstrap; no analytics plugin.
+require_once __DIR__ . '/inc/analytics.php';
+
 add_action('after_setup_theme', static function (): void {
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
@@ -23,6 +26,7 @@ add_action('wp_enqueue_scripts', static function (): void {
     wp_enqueue_script('aksen-atelier', get_theme_file_uri($js), [], (string) filemtime(get_theme_file_path($js)), true);
     $lead_js = '/assets/js/aksen-lead-tracking.js';
     wp_enqueue_script('aksen-lead-events', get_theme_file_uri($lead_js), ['jquery'], (string) filemtime(get_theme_file_path($lead_js)), true);
+    wp_script_add_data('aksen-lead-events', 'strategy', 'defer');
     if (function_exists('wp_script_add_data')) {
         wp_script_add_data('aksen-atelier', 'strategy', 'defer');
     }
