@@ -437,6 +437,35 @@ add_action('admin_post_aksen_provision_service_forms', static function (): void 
     }
     $existing = get_option('aksen_photo_service_form_ids', []);
     $ids = is_array($existing) ? $existing : [];
+
+    // Staging already contains eight live, service-specific Fluent Forms created
+    // through its authenticated REST API on 9 Nov 2026. Adopt them instead of
+    // making duplicates when the provisioning button is clicked for the first time.
+    // Never accept an ID solely on its numeric value: confirm the exact title.
+    $staging_seed = [
+        'wedding'   => [4, 'Aksen Photo – Ślub i wesele [Lead]'],
+        'communion' => [5, 'Aksen Photo – Komunia Święta [Lead]'],
+        'baptism'   => [6, 'Aksen Photo – Chrzest Święty [Lead]'],
+        'birthday'  => [7, 'Aksen Photo – Urodziny i 18-stki [Lead]'],
+        'prom'      => [8, 'Aksen Photo – Studniówka [Lead]'],
+        'business'  => [9, 'Aksen Photo – Sesja biznesowa [Lead]'],
+        'family'    => [10, 'Aksen Photo – Sesja rodzinna [Lead]'],
+        'event'     => [11, 'Aksen Photo – Event i reportaż [Lead]'],
+    ];
+    foreach ($staging_seed as $service_key => [$existing_id, $expected_title]) {
+        if (!empty($ids[$service_key])) {
+            continue;
+        }
+        try {
+            $candidate = $service->find($existing_id);
+            if ($candidate && (string) $candidate->title === $expected_title) {
+                $ids[$service_key] = $existing_id;
+            }
+        } catch (Throwable $ignored) {
+            // Missing seed does not prevent provisioning the remaining forms.
+        }
+    }
+    update_option('aksen_photo_service_form_ids', $ids, false);
     $errors = [];
     $created = 0;
     foreach (aksen_service_lead_specs() as $key => $spec) {
