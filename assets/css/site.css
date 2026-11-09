@@ -300,3 +300,33 @@ button,input,textarea,select{font:inherit}
 /* END AKSEN_EDITORIAL_HERO_RWD_20261109 */
 .aksen-footer-social{display:flex;flex-wrap:wrap;gap:8px 14px;margin:14px 0}
 .aksen-footer-social a{font-size:13px;line-height:1.5}
+
+
+/* Native public galleries: masonry, full photographs, no cropping, no plugin CSS. */
+.aksen-public-gallery{width:100%;max-width:100%;min-width:0;margin:clamp(24px,4vw,56px) auto}
+.aksen-public-gallery__photos{columns:3;column-gap:clamp(12px,1.5vw,24px)}
+.aksen-public-gallery__item{break-inside:avoid;page-break-inside:avoid;display:inline-block;width:100%;margin:0 0 clamp(12px,1.5vw,24px);vertical-align:top}
+.aksen-public-gallery__item>a{display:block;background:#eae7e0;text-decoration:none;border-radius:4px;overflow:hidden}
+.aksen-public-gallery__image{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;aspect-ratio:auto!important;transform:none!important}
+.aksen-public-gallery__item figcaption{padding:8px 2px;font:400 12px/1.5 var(--ap-sans,Arial,sans-serif);color:#666e66}
+.aksen-public-gallery__item a:hover{outline:2px solid #536b55;outline-offset:2px}
+.aksen-public-gallery__item a:focus-visible{outline:3px solid #346342;outline-offset:3px}
+.aksen-public-gallery__pagination{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;margin:24px 0 8px}
+.aksen-public-gallery__pagination a{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:44px;padding:7px 12px;text-decoration:none;border:1px solid #ccd4c8;border-radius:4px;background:#fff;color:#263c2d;font:650 13px/1.3 var(--ap-sans,Arial,sans-serif)}
+.aksen-public-gallery__pagination a[aria-current=page]{background:#2f4838;color:#fff;border-color:#2f4838}
+.aksen-public-gallery__counter{text-align:center;color:#70776f;font:400 12px/1.5 var(--ap-sans,Arial,sans-serif)}
+/* The dialog is appended by an optional 4.5 kB zero-dependency script. */
+.aksen-gallery-dialog{width:min(1450px,96vw);max-width:96vw;max-height:95dvh;padding:12px 14px 16px;border:1px solid #333;border-radius:7px;background:#151915;color:#f7f7f2;box-shadow:0 25px 80px #0008}
+.aksen-gallery-dialog::backdrop{background:#0b0d0bd9}
+.aksen-gallery-dialog__toolbar,.aksen-gallery-dialog__controls{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.aksen-gallery-dialog__toolbar{padding-bottom:10px}
+.aksen-gallery-dialog__figure{display:grid;justify-items:center;align-items:center;max-height:calc(95dvh - 138px);margin:0}
+.aksen-gallery-dialog__image{width:auto!important;max-width:100%!important;height:auto!important;max-height:calc(95dvh - 176px)!important;object-fit:contain}
+.aksen-gallery-dialog__caption{margin-top:7px;font:400 12px/1.5 var(--ap-sans,Arial,sans-serif);color:#d6ded6;text-align:center}
+.aksen-gallery-dialog button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:9px 16px;border:1px solid #708173;border-radius:4px;background:#27352a;color:#fff;cursor:pointer;font:650 13px/1.35 var(--ap-sans,Arial,sans-serif)}
+.aksen-gallery-dialog button:hover{background:#45634b}
+.aksen-gallery-dialog button:focus-visible{outline:3px solid #e3f2e4;outline-offset:3px}
+.aksen-gallery-dialog button:disabled{opacity:.35;cursor:default}
+.aksen-gallery-dialog__controls{justify-content:space-around;padding-top:12px}
+@media(max-width:1024px){.aksen-public-gallery__photos{columns:2}}
+@media(max-width:640px){.aksen-public-gallery__photos{columns:1}.aksen-gallery-dialog{width:100vw;max-width:100vw;max-height:100dvh;border-radius:0;border:0;padding:10px}.aksen-gallery-dialog__figure{max-height:calc(100dvh - 128px)}.aksen-gallery-dialog__image{max-height:calc(100dvh - 172px)!important}}
