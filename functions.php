@@ -6,6 +6,9 @@
 declare(strict_types=1);
 defined('ABSPATH') || exit;
 
+// Public galleries live in the theme; Picu remains an independent client-proofing plugin.
+require_once get_theme_file_path('/inc/public-gallery.php');
+
 add_action('after_setup_theme', static function (): void {
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
